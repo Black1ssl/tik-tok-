@@ -6,10 +6,33 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         die("URL tidak boleh kosong");
     }
 
+    // Validasi URL platform (basic & aman)
+    $allowed = [
+        "tiktok.com",
+        "instagram.com",
+        "youtube.com",
+        "youtu.be",
+        "twitter.com",
+        "x.com"
+    ];
+
+    $valid = false;
+    foreach ($allowed as $domain) {
+        if (strpos($url, $domain) !== false) {
+            $valid = true;
+            break;
+        }
+    }
+
+    if (!$valid) {
+        die("Platform belum didukung.");
+    }
+
     $safe_url = escapeshellarg($url);
-    $filename = "tiktok_" . time() . ".mp4";
+    $filename = "video_" . time() . ".mp4";
     $filepath = "/tmp/" . $filename;
 
+    // yt-dlp otomatis deteksi platform
     $command = "yt-dlp -f mp4 -o '$filepath' $safe_url 2>&1";
     shell_exec($command);
 
@@ -17,13 +40,12 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         die("Gagal mengunduh video.");
     }
 
-    // Paksa download ke browser
+    // Kirim ke browser
     header("Content-Type: video/mp4");
     header("Content-Disposition: attachment; filename=\"$filename\"");
     header("Content-Length: " . filesize($filepath));
     readfile($filepath);
 
-    // Hapus file setelah download
     unlink($filepath);
     exit;
 }
@@ -33,12 +55,62 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>TikTok Downloader</title>
+    <title>Multi Platform Video Downloader</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f8;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .box {
+            background: #fff;
+            padding: 25px;
+            width: 360px;
+            border-radius: 8px;
+            box-shadow: 0 6px 15px rgba(0,0,0,.1);
+        }
+        h2 {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        p {
+            font-size: 13px;
+            text-align: center;
+            color: #666;
+            margin-bottom: 15px;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 12px;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background: #000;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #333;
+        }
+    </style>
 </head>
 <body>
+
+<div class="box">
+    <h2>Video Downloader</h2>
+    <p>Mendukung TikTok, Instagram, YouTube Shorts, Twitter (X)</p>
+
     <form method="POST">
-        <input type="text" name="url" placeholder="Tempel link TikTok" required>
+        <input type="text" name="url" placeholder="Tempel link video" required>
         <button type="submit">Download</button>
     </form>
+</div>
+
 </body>
 </html>
