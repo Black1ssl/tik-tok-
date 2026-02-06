@@ -6,7 +6,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         die("URL tidak boleh kosong");
     }
 
-    // Validasi URL platform (basic & aman)
     $allowed = [
         "tiktok.com",
         "instagram.com",
@@ -32,15 +31,15 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $filename = "video_" . time() . ".mp4";
     $filepath = "/tmp/" . $filename;
 
-    // yt-dlp otomatis deteksi platform
-    $command = "yt-dlp -f mp4 -o '$filepath' $safe_url 2>&1";
-    shell_exec($command);
+    // COMMAND PALING AMAN
+    $command = "yt-dlp -f best --merge-output-format mp4 -o '$filepath' $safe_url 2>&1";
+    $output = shell_exec($command);
 
     if (!file_exists($filepath)) {
-        die("Gagal mengunduh video.");
+        // tampilkan error asli (penting saat debugging)
+        die("<pre>Gagal mengunduh video:\n$output</pre>");
     }
 
-    // Kirim ke browser
     header("Content-Type: video/mp4");
     header("Content-Disposition: attachment; filename=\"$filename\"");
     header("Content-Length: " . filesize($filepath));
