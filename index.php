@@ -17,7 +17,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
     $valid = false;
     foreach ($allowed as $domain) {
-        if (strpos($url, $domain) !== false) {
+        if (stripos($url, $domain) !== false) {
             $valid = true;
             break;
         }
@@ -31,12 +31,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $filename = "video_" . time() . ".mp4";
     $filepath = "/tmp/" . $filename;
 
-    // COMMAND PALING AMAN
-    $command = "yt-dlp -f best --merge-output-format mp4 -o '$filepath' $safe_url 2>&1";
+    // COMMAND YANG BENAR
+    $command = "yt-dlp -f mp4 --merge-output-format mp4 -o $filepath $safe_url 2>&1";
     $output = shell_exec($command);
 
     if (!file_exists($filepath)) {
-        // tampilkan error asli (penting saat debugging)
         die("<pre>Gagal mengunduh video:\n$output</pre>");
     }
 
@@ -49,6 +48,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     exit;
 }
 ?>
+
 
 <!DOCTYPE html>
 <html lang="id">
